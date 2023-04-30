@@ -1,0 +1,12 @@
+spring:
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: true
+      WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS: false
+    deserialization:
+      READ_DATE_TIMESTAMPS_AS_NANOSECONDS: false
+
+logging:
+  level:
+    root: DEBUG
+
