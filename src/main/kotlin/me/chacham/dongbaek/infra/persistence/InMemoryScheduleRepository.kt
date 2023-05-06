@@ -15,12 +15,16 @@ class InMemoryScheduleRepository : ScheduleRepository {
         return ScheduleId(counter.getAndIncrement().toString())
     }
 
+    override fun save(schedule: Schedule): ScheduleId {
+        scheduleMap[schedule.id] = schedule
+        return schedule.id
+    }
+
     override fun find(id: ScheduleId): Schedule? {
         return scheduleMap[id]
     }
 
-    override fun save(schedule: Schedule): ScheduleId {
-        scheduleMap[schedule.id] = schedule
-        return schedule.id
+    override fun list(): List<Schedule> {
+        return scheduleMap.values.toList()
     }
 }

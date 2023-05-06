@@ -26,7 +26,11 @@ class ScheduleController(val scheduleRepository: ScheduleRepository) {
     @GetMapping("/{id}")
     fun find(@PathVariable("id") idValue: String): ResponseEntity<Schedule> {
         val id = ScheduleId(idValue)
-        return ResponseEntity.ofNullable(scheduleRepository.find(id))
+        val schedule = scheduleRepository.find(id)
+        if (schedule != null) {
+            return ResponseEntity.ok(schedule)
+        }
+        return ResponseEntity.notFound().build()
     }
 
     data class CreateScheduleRequest(val title: String)
