@@ -5,4 +5,5 @@ interface ScheduleRepository {
     fun save(schedule: Schedule): ScheduleId
     fun find(id: ScheduleId): Schedule?
     fun list(): List<Schedule>
+    fun delete(scheduleId: ScheduleId): ScheduleId
 }

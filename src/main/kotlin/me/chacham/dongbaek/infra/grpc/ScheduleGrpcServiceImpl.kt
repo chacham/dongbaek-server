@@ -1,7 +1,8 @@
 package me.chacham.dongbaek.infra.grpc
 
 import me.chacham.dongbaek.domain.schedule.*
-import me.chacham.dongbaek.infra.proto.PbConverter
+import me.chacham.dongbaek.infra.proto.PbUtils
+import me.chacham.dongbaek.infra.proto.PbUtils.toSchedule
 import net.devh.boot.grpc.server.service.GrpcService
 import java.time.Instant
 
@@ -26,13 +27,28 @@ class ScheduleGrpcServiceImpl(val scheduleRepository: ScheduleRepository) :
     override suspend fun getSchedule(request: GetScheduleRequest): GetScheduleResponse {
         val id = ScheduleId(request.scheduleId)
         return scheduleRepository.find(id)
-            ?.let { PbConverter.toPbSchedule(it) }
+            ?.let { PbUtils.toPbSchedule(it) }
             ?.let { GetScheduleResponse.newBuilder().setSchedule(it).build() }!! // TODO: Add exception
     }
 
-    override suspend fun listSchedule(request: ListScheduleRequest): ListScheduleResponse {
+    override suspend fun getSchedules(request: GetSchedulesRequest): GetSchedulesResponse {
         val schedules = scheduleRepository.list()
-        val pbSchedules = schedules.map { PbConverter.toPbSchedule(it) }
-        return ListScheduleResponse.newBuilder().addAllSchedules(pbSchedules).build()
+        val pbSchedules = schedules.map { PbUtils.toPbSchedule(it) }
+        return GetSchedulesResponse.newBuilder().addAllSchedules(pbSchedules).build()
+    }
+
+    override suspend fun replaceSchedule(request: ReplaceScheduleRequest): ReplaceScheduleResponse {
+        val pbSchedule = request.schedule
+        val schedule = pbSchedule.toSchedule()
+        scheduleRepository.save(schedule)
+        return ReplaceScheduleResponse.newBuilder()
+            .setScheduleId(schedule.id.value)
+            .build()
+    }
+
+    override suspend fun deleteSchedule(request: DeleteScheduleRequest): DeleteScheduleResponse {
+        val scheduleId = ScheduleId(request.scheduleId)
+        scheduleRepository.delete(scheduleId)
+        return DeleteScheduleResponse.getDefaultInstance()
     }
 }

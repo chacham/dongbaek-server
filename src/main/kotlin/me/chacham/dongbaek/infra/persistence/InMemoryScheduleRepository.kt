@@ -27,4 +27,9 @@ class InMemoryScheduleRepository : ScheduleRepository {
     override fun list(): List<Schedule> {
         return scheduleMap.values.toList()
     }
+
+    override fun delete(scheduleId: ScheduleId): ScheduleId {
+        scheduleMap.remove(scheduleId)
+        return scheduleId
+    }
 }
