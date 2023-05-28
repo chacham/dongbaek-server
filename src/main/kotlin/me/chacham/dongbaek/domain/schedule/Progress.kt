@@ -7,25 +7,25 @@ data class ProgressId(val value: String)
 
 sealed class Progress(
     open val scheduleId: ScheduleId,
-    open val startDate: Instant,
-    open val endDate: Instant?,
+    open val startInstant: Instant,
+    open val endInstant: Instant?,
 ) {
     fun getId(): ProgressId {
-        return ProgressId("${scheduleId.value}_${startDate}")
+        return ProgressId("${scheduleId.value}_${startInstant}")
     }
 }
 
 data class QuantityProgress(
     override val scheduleId: ScheduleId,
-    override val startDate: Instant,
-    override val endDate: Instant? = null,
+    override val startInstant: Instant,
+    override val endInstant: Instant? = null,
     val quantity: Int = 0,
-) : Progress(scheduleId, startDate, endDate)
+) : Progress(scheduleId, startInstant, endInstant)
 
 data class DurationProgress(
     override val scheduleId: ScheduleId,
-    override val startDate: Instant,
-    override val endDate: Instant? = null,
+    override val startInstant: Instant,
+    override val endInstant: Instant? = null,
     val duration: Duration = Duration.ZERO,
     val ongoingStartTime: Instant? = null,
-) : Progress(scheduleId, startDate, endDate)
+) : Progress(scheduleId, startInstant, endInstant)

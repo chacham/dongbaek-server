@@ -20,8 +20,8 @@ class InMemoryProgressRepository : ProgressRepository {
     override fun list(scheduleIds: List<ScheduleId>, instant: Instant): List<Progress> {
         return progressMap.values.filter {
             it.scheduleId in scheduleIds
-                    && !it.startDate.isAfter(instant)
-                    && (it.endDate?.isAfter(instant) ?: true)
+                    && !it.startInstant.isAfter(instant)
+                    && (it.endInstant?.isAfter(instant) ?: true)
         }
     }
 }

@@ -8,9 +8,9 @@ data class ScheduleId(val value: String)
 data class Schedule(
     val id: ScheduleId,
     val title: String,
-    val startDate: Instant,
-    val dueDate: Instant?,
-    val finishDate: Instant?,
+    val startInstant: Instant,
+    val dueInstant: Instant?,
+    val finishInstant: Instant?,
     val goal: Goal,
     val repeatInfo: RepeatInfo,
 )

@@ -13,8 +13,7 @@ class ProgressGrpcServiceImpl(val progressRepository: ProgressRepository) :
     ProgressServiceGrpcKt.ProgressServiceCoroutineImplBase() {
     override suspend fun getProgresses(request: GetProgressesRequest): GetProgressesResponse {
         val scheduleIds = request.scheduleIdsList.map { ScheduleId(it) }
-        val instant = request.datetime.toInstant()
-        val progresses = progressRepository.list(scheduleIds, instant)
+        val progresses = progressRepository.list(scheduleIds, request.timestamp.toInstant())
         val pbProgresses = progresses.map { it.toPbProgress() }
         return GetProgressesResponse.newBuilder()
             .addAllProgresses(pbProgresses)
@@ -26,7 +25,7 @@ class ProgressGrpcServiceImpl(val progressRepository: ProgressRepository) :
         progressRepository.save(progress)
         return replaceProgressResponse {
             scheduleId = progress.scheduleId.value
-            startTimestamp = progress.startDate.toPbTimestamp()
+            startTimestamp = progress.startInstant.toPbTimestamp()
         }
     }
 }

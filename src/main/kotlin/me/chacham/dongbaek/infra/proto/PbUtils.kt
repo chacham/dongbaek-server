@@ -30,9 +30,9 @@ object PbUtils {
 
     fun PbSchedule.toSchedule(): Schedule {
         val id = ScheduleId(id)
-        val startDate = Instant.ofEpochSecond(startDate.seconds)
-        val dueDate = if (hasDueDate()) Instant.ofEpochSecond(dueDate.seconds) else null
-        val finishDate = if (hasFinishDate()) Instant.ofEpochSecond(finishDate.seconds) else null
+        val startDate = Instant.ofEpochSecond(startTimestamp.seconds)
+        val dueDate = dueTimestampOrNull?.toInstant()
+        val finishDate = finishTimestampOrNull?.toInstant()
         val goal = goal.toGoal()
         val repeatInfo = repeatInfo.toRepeatInfo()
         return Schedule(id, title, startDate, dueDate, finishDate, goal, repeatInfo)
@@ -43,7 +43,7 @@ object PbUtils {
             return QuantityGoal(quantityGoal)
         }
         if (hasDurationGoal()) {
-            val duration = Duration.ofSeconds(durationGoal.seconds)
+            val duration = durationGoal.toDuration()
             return DurationGoal(duration)
         }
         throw NotImplementedError()
@@ -63,14 +63,14 @@ object PbUtils {
         val builder = PbSchedule.newBuilder()
             .setId(schedule.id.value)
             .setTitle(schedule.title)
-            .setStartDate(PbTimestamp.newBuilder().setSeconds(schedule.startDate.epochSecond))
+            .setStartTimestamp(PbTimestamp.newBuilder().setSeconds(schedule.startInstant.epochSecond))
             .setGoal(toPbGoal(schedule.goal))
             .setRepeatInfo(toPbRepeatInfo(schedule.repeatInfo))
-        if (schedule.dueDate != null) {
-            builder.setDueDate(PbTimestamp.newBuilder().setSeconds(schedule.dueDate.epochSecond))
+        if (schedule.dueInstant != null) {
+            builder.setDueTimestamp(PbTimestamp.newBuilder().setSeconds(schedule.dueInstant.epochSecond))
         }
-        if (schedule.finishDate != null) {
-            builder.setFinishDate(PbTimestamp.newBuilder().setSeconds(schedule.finishDate.epochSecond))
+        if (schedule.finishInstant != null) {
+            builder.setFinishTimestamp(PbTimestamp.newBuilder().setSeconds(schedule.finishInstant.epochSecond))
         }
         return builder.build()
     }
@@ -79,8 +79,7 @@ object PbUtils {
         return when (goal) {
             is QuantityGoal -> PbGoal.newBuilder().setQuantityGoal(goal.quantity).build()
             is DurationGoal -> {
-                val durationSec = goal.duration.seconds
-                val pbDuration = com.google.protobuf.Duration.newBuilder().setSeconds(durationSec).build()
+                val pbDuration = goal.duration.toPbDuration()
                 PbGoal.newBuilder().setDurationGoal(pbDuration).build()
             }
         }
@@ -101,18 +100,18 @@ object PbUtils {
         if (this.hasQuantityProgress()) {
             return QuantityProgress(
                 ScheduleId(this.scheduleId),
-                this.startDate.toInstant(),
-                this.endDateOrNull?.toInstant(),
-                this.quantityProgress.value,
+                this.startTimestamp.toInstant(),
+                this.endTimestampOrNull?.toInstant(),
+                this.quantityProgress.quantity,
             )
         }
         if (this.hasDurationProgress()) {
             return DurationProgress(
                 ScheduleId(this.scheduleId),
-                this.startDate.toInstant(),
-                this.endDateOrNull?.toInstant(),
-                this.durationProgress.value.toDuration(),
-                this.durationProgress.ongoingStartTime.toInstant(),
+                this.startTimestamp.toInstant(),
+                this.endTimestampOrNull?.toInstant(),
+                this.durationProgress.duration.toDuration(),
+                this.durationProgress.ongoingStartTimestampOrNull?.toInstant(),
             )
         }
         throw NotImplementedError()
@@ -121,15 +120,15 @@ object PbUtils {
     fun Progress.toPbProgress(): PbProgress {
         val p = this
         val pbQuantityProgress =
-            if (p is QuantityProgress) pbQuantityProgress { value = p.quantity } else null
+            if (p is QuantityProgress) pbQuantityProgress { quantity = p.quantity } else null
         val pbDurationProgress =
             if (p is DurationProgress) pbDurationProgress {
-                value = p.duration.toPbDuration()
+                duration = p.duration.toPbDuration()
             } else null
         return pbProgress {
             scheduleId = p.scheduleId.value
-            startDate = p.startDate.toPbTimestamp()
-            p.endDate.let { if (it != null) endDate = it.toPbTimestamp() }
+            startTimestamp = p.startInstant.toPbTimestamp()
+            p.endInstant.let { if (it != null) endTimestamp = it.toPbTimestamp() }
             pbQuantityProgress.let { if (it != null) quantityProgress = it }
             pbDurationProgress.let { if (it != null) durationProgress = it }
         }

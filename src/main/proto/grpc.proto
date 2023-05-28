@@ -18,11 +18,11 @@ message CreateScheduleRequest {
   string title = 1;
 }
 message CreateScheduleResponse {
-  string scheduleId = 1;
+  string schedule_id = 1;
 }
 
 message GetScheduleRequest {
-  string scheduleId = 1;
+  string schedule_id = 1;
 }
 message GetScheduleResponse {
   PbSchedule schedule = 1;
@@ -53,7 +53,7 @@ service ProgressService {
 
 message GetProgressesRequest {
   repeated string schedule_ids = 1;
-  google.protobuf.Timestamp datetime = 2;
+  google.protobuf.Timestamp timestamp = 2;
 }
 message GetProgressesResponse {
   repeated PbProgress progresses = 1;
