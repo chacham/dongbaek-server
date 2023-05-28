@@ -38,8 +38,7 @@ class ScheduleGrpcServiceImpl(val scheduleRepository: ScheduleRepository) :
     }
 
     override suspend fun replaceSchedule(request: ReplaceScheduleRequest): ReplaceScheduleResponse {
-        val pbSchedule = request.schedule
-        val schedule = pbSchedule.toSchedule()
+        val schedule = request.schedule.toSchedule()
         scheduleRepository.save(schedule)
         return ReplaceScheduleResponse.newBuilder()
             .setScheduleId(schedule.id.value)
