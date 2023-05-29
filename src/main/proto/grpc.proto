@@ -16,6 +16,10 @@ service ScheduleService {
 
 message CreateScheduleRequest {
   string title = 1;
+  google.protobuf.Timestamp start_timestamp = 2;
+  optional google.protobuf.Timestamp due_timestamp = 3;
+  PbGoal goal = 4;
+  PbRepeatInfo repeat_info = 5;
 }
 message CreateScheduleResponse {
   string schedule_id = 1;

@@ -13,11 +13,9 @@ class ProgressGrpcServiceImpl(val progressRepository: ProgressRepository) :
     ProgressServiceGrpcKt.ProgressServiceCoroutineImplBase() {
     override suspend fun getProgresses(request: GetProgressesRequest): GetProgressesResponse {
         val scheduleIds = request.scheduleIdsList.map { ScheduleId(it) }
-        val progresses = progressRepository.list(scheduleIds, request.timestamp.toInstant())
-        val pbProgresses = progresses.map { it.toPbProgress() }
-        return GetProgressesResponse.newBuilder()
-            .addAllProgresses(pbProgresses)
-            .build()
+        val pbProgresses = progressRepository.list(scheduleIds, request.timestamp.toInstant())
+            .map { it.toPbProgress() }
+        return getProgressesResponse { progresses.addAll(pbProgresses) }
     }
 
     override suspend fun replaceProgress(request: ReplaceProgressRequest): ReplaceProgressResponse {

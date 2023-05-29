@@ -10,11 +10,14 @@ import com.google.protobuf.timestamp as pbTimestamp
 
 object PbUtils {
     fun PbTimestamp.toInstant(): Instant {
-        return Instant.ofEpochSecond(this.seconds)
+        return Instant.ofEpochSecond(this.seconds, this.nanos.toLong())
     }
 
     fun Instant.toPbTimestamp(): PbTimestamp {
-        return pbTimestamp { seconds = this.seconds }
+        return pbTimestamp {
+            seconds = this@toPbTimestamp.epochSecond
+            nanos = this@toPbTimestamp.nano
+        }
     }
 
     fun PbDuration.toDuration(): Duration {
@@ -23,14 +26,14 @@ object PbUtils {
 
     fun Duration.toPbDuration(): PbDuration {
         return pbDuration {
-            seconds = this.seconds
-            nanos = this.nanos
+            seconds = this@toPbDuration.seconds
+            nanos = this@toPbDuration.nano
         }
     }
 
     fun PbSchedule.toSchedule(): Schedule {
         val id = ScheduleId(id)
-        val startDate = Instant.ofEpochSecond(startTimestamp.seconds)
+        val startDate = startTimestamp.toInstant()
         val dueDate = dueTimestampOrNull?.toInstant()
         val finishDate = finishTimestampOrNull?.toInstant()
         val goal = goal.toGoal()
@@ -38,7 +41,29 @@ object PbUtils {
         return Schedule(id, title, startDate, dueDate, finishDate, goal, repeatInfo)
     }
 
-    private fun PbGoal.toGoal(): Goal {
+    fun Schedule.toPbSchedule(): PbSchedule {
+        return pbSchedule {
+            id = this@toPbSchedule.id.value
+            title = this@toPbSchedule.title
+            startTimestamp = this@toPbSchedule.startInstant.toPbTimestamp()
+            this@toPbSchedule.dueInstant.let { if (it != null) dueTimestamp = it.toPbTimestamp() }
+            this@toPbSchedule.finishInstant.let { if (it != null) finishTimestamp = it.toPbTimestamp() }
+            goal = this@toPbSchedule.goal.toPbGoal()
+            repeatInfo = this@toPbSchedule.repeatInfo.toPbRepeatInfo()
+        }
+    }
+
+    fun Goal.toPbGoal(): PbGoal {
+        return when (this) {
+            is QuantityGoal -> PbGoal.newBuilder().setQuantityGoal(quantity).build()
+            is DurationGoal -> {
+                val pbDuration = duration.toPbDuration()
+                pbGoal { durationGoal = pbDuration }
+            }
+        }
+    }
+
+    fun PbGoal.toGoal(): Goal {
         if (hasQuantityGoal()) {
             return QuantityGoal(quantityGoal)
         }
@@ -49,7 +74,19 @@ object PbUtils {
         throw NotImplementedError()
     }
 
-    private fun PbRepeatInfo.toRepeatInfo(): RepeatInfo {
+    fun RepeatInfo.toPbRepeatInfo(): PbRepeatInfo {
+        return when (this) {
+            is Unrepeated -> pbRepeatInfo { unrepeated = pbUnrepeated { } }
+            is Periodic -> pbRepeatInfo {
+                periodicRepeat = pbPeriodic {
+                    periodDays = this@toPbRepeatInfo.periodDays
+                    offsetDays = this@toPbRepeatInfo.offsetDays
+                }
+            }
+        }
+    }
+
+    fun PbRepeatInfo.toRepeatInfo(): RepeatInfo {
         if (hasUnrepeated()) {
             return Unrepeated
         }
@@ -57,43 +94,6 @@ object PbUtils {
             return Periodic(periodicRepeat.periodDays, periodicRepeat.offsetDays)
         }
         throw NotImplementedError()
-    }
-
-    fun toPbSchedule(schedule: Schedule): PbSchedule {
-        val builder = PbSchedule.newBuilder()
-            .setId(schedule.id.value)
-            .setTitle(schedule.title)
-            .setStartTimestamp(PbTimestamp.newBuilder().setSeconds(schedule.startInstant.epochSecond))
-            .setGoal(toPbGoal(schedule.goal))
-            .setRepeatInfo(toPbRepeatInfo(schedule.repeatInfo))
-        if (schedule.dueInstant != null) {
-            builder.setDueTimestamp(PbTimestamp.newBuilder().setSeconds(schedule.dueInstant.epochSecond))
-        }
-        if (schedule.finishInstant != null) {
-            builder.setFinishTimestamp(PbTimestamp.newBuilder().setSeconds(schedule.finishInstant.epochSecond))
-        }
-        return builder.build()
-    }
-
-    private fun toPbGoal(goal: Goal): PbGoal {
-        return when (goal) {
-            is QuantityGoal -> PbGoal.newBuilder().setQuantityGoal(goal.quantity).build()
-            is DurationGoal -> {
-                val pbDuration = goal.duration.toPbDuration()
-                PbGoal.newBuilder().setDurationGoal(pbDuration).build()
-            }
-        }
-    }
-
-    private fun toPbRepeatInfo(repeatInfo: RepeatInfo): PbRepeatInfo {
-        return when (repeatInfo) {
-            is Unrepeated -> PbRepeatInfo.newBuilder().setUnrepeated(PbRepeatInfo.newBuilder().unrepeated).build()
-            is Periodic -> {
-                val (periodDays, offsetDays) = repeatInfo
-                val pbPeriodic = PbPeriodic.newBuilder().setPeriodDays(periodDays).setOffsetDays(offsetDays).build()
-                PbRepeatInfo.newBuilder().setPeriodicRepeat(pbPeriodic).build()
-            }
-        }
     }
 
     fun PbProgress.toProgress(): Progress {
@@ -118,17 +118,16 @@ object PbUtils {
     }
 
     fun Progress.toPbProgress(): PbProgress {
-        val p = this
         val pbQuantityProgress =
-            if (p is QuantityProgress) pbQuantityProgress { quantity = p.quantity } else null
+            if (this is QuantityProgress) pbQuantityProgress { quantity = this@toPbProgress.quantity } else null
         val pbDurationProgress =
-            if (p is DurationProgress) pbDurationProgress {
-                duration = p.duration.toPbDuration()
+            if (this is DurationProgress) pbDurationProgress {
+                duration = this@toPbProgress.duration.toPbDuration()
             } else null
         return pbProgress {
-            scheduleId = p.scheduleId.value
-            startTimestamp = p.startInstant.toPbTimestamp()
-            p.endInstant.let { if (it != null) endTimestamp = it.toPbTimestamp() }
+            scheduleId = this@toPbProgress.scheduleId.value
+            startTimestamp = this@toPbProgress.startInstant.toPbTimestamp()
+            this@toPbProgress.endInstant.let { if (it != null) endTimestamp = it.toPbTimestamp() }
             pbQuantityProgress.let { if (it != null) quantityProgress = it }
             pbDurationProgress.let { if (it != null) durationProgress = it }
         }

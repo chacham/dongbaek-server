@@ -1,10 +1,14 @@
 package me.chacham.dongbaek.infra.grpc
 
-import me.chacham.dongbaek.domain.schedule.*
-import me.chacham.dongbaek.infra.proto.PbUtils
+import me.chacham.dongbaek.domain.schedule.Schedule
+import me.chacham.dongbaek.domain.schedule.ScheduleId
+import me.chacham.dongbaek.domain.schedule.ScheduleRepository
+import me.chacham.dongbaek.infra.proto.PbUtils.toGoal
+import me.chacham.dongbaek.infra.proto.PbUtils.toInstant
+import me.chacham.dongbaek.infra.proto.PbUtils.toPbSchedule
+import me.chacham.dongbaek.infra.proto.PbUtils.toRepeatInfo
 import me.chacham.dongbaek.infra.proto.PbUtils.toSchedule
 import net.devh.boot.grpc.server.service.GrpcService
-import java.time.Instant
 
 @GrpcService
 class ScheduleGrpcServiceImpl(val scheduleRepository: ScheduleRepository) :
@@ -14,40 +18,37 @@ class ScheduleGrpcServiceImpl(val scheduleRepository: ScheduleRepository) :
         val schedule = Schedule(
             id,
             request.title,
-            Instant.now(),
-            Instant.now().plusSeconds(3600 * 24 * 7),
+            request.startTimestamp.toInstant(),
+            request.dueTimestampOrNull?.toInstant(),
             null,
-            QuantityGoal(10),
-            Unrepeated
+            request.goal.toGoal(),
+            request.repeatInfo.toRepeatInfo()
         )
         scheduleRepository.save(schedule)
-        return CreateScheduleResponse.newBuilder().setScheduleId(id.value).build()
+        return createScheduleResponse { scheduleId = id.value }
     }
 
     override suspend fun getSchedule(request: GetScheduleRequest): GetScheduleResponse {
         val id = ScheduleId(request.scheduleId)
         return scheduleRepository.find(id)
-            ?.let { PbUtils.toPbSchedule(it) }
-            ?.let { GetScheduleResponse.newBuilder().setSchedule(it).build() }!! // TODO: Add exception
+            ?.toPbSchedule()
+            ?.let { getScheduleResponse { schedule = it } }!! // TODO: Add exception
     }
 
     override suspend fun getSchedules(request: GetSchedulesRequest): GetSchedulesResponse {
-        val schedules = scheduleRepository.list()
-        val pbSchedules = schedules.map { PbUtils.toPbSchedule(it) }
-        return GetSchedulesResponse.newBuilder().addAllSchedules(pbSchedules).build()
+        val pbSchedules = scheduleRepository.list().map { it.toPbSchedule() }
+        return getSchedulesResponse { schedules.addAll(pbSchedules) }
     }
 
     override suspend fun replaceSchedule(request: ReplaceScheduleRequest): ReplaceScheduleResponse {
         val schedule = request.schedule.toSchedule()
         scheduleRepository.save(schedule)
-        return ReplaceScheduleResponse.newBuilder()
-            .setScheduleId(schedule.id.value)
-            .build()
+        return replaceScheduleResponse { scheduleId = schedule.id.value }
     }
 
     override suspend fun deleteSchedule(request: DeleteScheduleRequest): DeleteScheduleResponse {
         val scheduleId = ScheduleId(request.scheduleId)
         scheduleRepository.delete(scheduleId)
-        return DeleteScheduleResponse.getDefaultInstance()
+        return deleteScheduleResponse { }
     }
 }
