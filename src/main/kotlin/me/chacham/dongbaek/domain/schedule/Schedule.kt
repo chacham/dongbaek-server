@@ -21,4 +21,4 @@ data class DurationGoal(val duration: Duration) : Goal()
 
 sealed class RepeatInfo
 object Unrepeated : RepeatInfo()
-data class Periodic(val periodDays: Int, val offsetDays: Int) : RepeatInfo()
+data class Periodic(val periodDuration: Duration, val offsetDuration: Duration) : RepeatInfo()

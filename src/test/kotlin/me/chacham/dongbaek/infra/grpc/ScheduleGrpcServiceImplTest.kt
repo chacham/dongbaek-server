@@ -29,7 +29,7 @@ class ScheduleGrpcServiceImplTest {
             Instant.now().plusSeconds(3600),
             null,
             QuantityGoal(50),
-            Periodic(10, 3)
+            Periodic(Duration.ofDays(10), Duration.ofDays(3))
         )
         coEvery { scheduleRepositoryMock.nextId() } returns s.id
         coEvery { scheduleRepositoryMock.save(s) } returns s.id
@@ -60,7 +60,7 @@ class ScheduleGrpcServiceImplTest {
             Instant.now().plusSeconds(3600),
             null,
             QuantityGoal(50),
-            Periodic(10, 3)
+            Periodic(Duration.ofDays(10), Duration.ofDays(3))
         )
         coEvery { scheduleRepositoryMock.find(id) } returns s
 
@@ -83,7 +83,7 @@ class ScheduleGrpcServiceImplTest {
             Instant.now().plusSeconds(3600),
             null,
             QuantityGoal(50),
-            Periodic(10, 3)
+            Periodic(Duration.ofDays(20), Duration.ofDays(7))
         )
         val id2 = ScheduleId("testScheduleId1")
         val s2 = Schedule(
@@ -116,7 +116,7 @@ class ScheduleGrpcServiceImplTest {
             Instant.now().plusSeconds(3600),
             Instant.now().plusSeconds(1800),
             QuantityGoal(10),
-            Periodic(7, 3)
+            Periodic(Duration.ofDays(7), Duration.ofDays(2))
         )
         coEvery { scheduleRepositoryMock.save(s) } returns id
 

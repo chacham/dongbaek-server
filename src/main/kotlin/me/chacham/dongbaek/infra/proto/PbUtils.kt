@@ -79,8 +79,8 @@ object PbUtils {
             is Unrepeated -> pbRepeatInfo { unrepeated = pbUnrepeated { } }
             is Periodic -> pbRepeatInfo {
                 periodicRepeat = pbPeriodic {
-                    periodDays = this@toPbRepeatInfo.periodDays
-                    offsetDays = this@toPbRepeatInfo.offsetDays
+                    periodDuration = this@toPbRepeatInfo.periodDuration.toPbDuration()
+                    offsetDuration = this@toPbRepeatInfo.offsetDuration.toPbDuration()
                 }
             }
         }
@@ -91,7 +91,7 @@ object PbUtils {
             return Unrepeated
         }
         if (hasPeriodicRepeat()) {
-            return Periodic(periodicRepeat.periodDays, periodicRepeat.offsetDays)
+            return Periodic(periodicRepeat.periodDuration.toDuration(), periodicRepeat.offsetDuration.toDuration())
         }
         throw NotImplementedError()
     }
