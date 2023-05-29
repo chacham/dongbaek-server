@@ -3,6 +3,6 @@ package me.chacham.dongbaek.domain.schedule
 import java.time.Instant
 
 interface ProgressRepository {
-    fun save(progress: Progress): ProgressId
-    fun list(scheduleIds: List<ScheduleId>, instant: Instant): List<Progress>
+    suspend fun save(progress: Progress): ProgressId
+    suspend fun list(scheduleIds: List<ScheduleId>, instant: Instant): List<Progress>
 }

@@ -1,9 +1,9 @@
 package me.chacham.dongbaek.domain.schedule
 
 interface ScheduleRepository {
-    fun nextId(): ScheduleId
-    fun save(schedule: Schedule): ScheduleId
-    fun find(id: ScheduleId): Schedule?
-    fun list(): List<Schedule>
-    fun delete(scheduleId: ScheduleId): ScheduleId
+    suspend fun nextId(): ScheduleId
+    suspend fun save(schedule: Schedule): ScheduleId
+    suspend fun find(id: ScheduleId): Schedule?
+    suspend fun list(): List<Schedule>
+    suspend fun delete(scheduleId: ScheduleId): ScheduleId
 }

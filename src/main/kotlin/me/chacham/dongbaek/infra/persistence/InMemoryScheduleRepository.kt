@@ -11,24 +11,24 @@ class InMemoryScheduleRepository : ScheduleRepository {
     private val counter = AtomicLong()
     private val scheduleMap = mutableMapOf<ScheduleId, Schedule>()
 
-    override fun nextId(): ScheduleId {
+    override suspend fun nextId(): ScheduleId {
         return ScheduleId(counter.getAndIncrement().toString())
     }
 
-    override fun save(schedule: Schedule): ScheduleId {
+    override suspend fun save(schedule: Schedule): ScheduleId {
         scheduleMap[schedule.id] = schedule
         return schedule.id
     }
 
-    override fun find(id: ScheduleId): Schedule? {
+    override suspend fun find(id: ScheduleId): Schedule? {
         return scheduleMap[id]
     }
 
-    override fun list(): List<Schedule> {
+    override suspend fun list(): List<Schedule> {
         return scheduleMap.values.toList()
     }
 
-    override fun delete(scheduleId: ScheduleId): ScheduleId {
+    override suspend fun delete(scheduleId: ScheduleId): ScheduleId {
         scheduleMap.remove(scheduleId)
         return scheduleId
     }

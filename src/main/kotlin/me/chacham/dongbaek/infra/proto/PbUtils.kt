@@ -20,11 +20,11 @@ object PbUtils {
         }
     }
 
-    fun PbDuration.toDuration(): Duration {
+    private fun PbDuration.toDuration(): Duration {
         return Duration.ofSeconds(this.seconds, this.nanos.toLong())
     }
 
-    fun Duration.toPbDuration(): PbDuration {
+    private fun Duration.toPbDuration(): PbDuration {
         return pbDuration {
             seconds = this@toPbDuration.seconds
             nanos = this@toPbDuration.nano

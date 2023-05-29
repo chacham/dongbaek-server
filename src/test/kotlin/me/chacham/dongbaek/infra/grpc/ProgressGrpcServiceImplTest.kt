@@ -1,9 +1,9 @@
 package me.chacham.dongbaek.infra.grpc
 
-import io.mockk.every
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import me.chacham.dongbaek.domain.schedule.DurationProgress
 import me.chacham.dongbaek.domain.schedule.ProgressRepository
@@ -26,7 +26,7 @@ class ProgressGrpcServiceImplTest {
         val sId2 = ScheduleId("sid2")
         val progress1 = QuantityProgress(sId1, Instant.now())
         val progress2 = DurationProgress(sId2, Instant.now())
-        every { progressRepositoryMock.list(listOf(sId1, sId2), any()) } returns listOf(progress1, progress2)
+        coEvery { progressRepositoryMock.list(listOf(sId1, sId2), any()) } returns listOf(progress1, progress2)
 
         val time = Instant.now()
         val request = getProgressesRequest {
@@ -35,7 +35,7 @@ class ProgressGrpcServiceImplTest {
         }
         val response = runBlocking { impl.getProgresses(request) }
 
-        verify { progressRepositoryMock.list(listOf(sId1, sId2), time) }
+        coVerify { progressRepositoryMock.list(listOf(sId1, sId2), time) }
         assertEquals(getProgressesResponse {
             progresses.addAll(listOf(progress1.toPbProgress(), progress2.toPbProgress()))
         }, response)
@@ -47,14 +47,14 @@ class ProgressGrpcServiceImplTest {
 
         val sId = ScheduleId("sid")
         val p = QuantityProgress(sId, Instant.now())
-        every { progressRepositoryMock.save(p) } returns p.getId()
+        coEvery { progressRepositoryMock.save(p) } returns p.getId()
 
         val request = replaceProgressRequest {
             progress = p.toPbProgress()
         }
         val response = runBlocking { impl.replaceProgress(request) }
 
-        verify { progressRepositoryMock.save(p) }
+        coVerify { progressRepositoryMock.save(p) }
         assertEquals(replaceProgressResponse {
             scheduleId = p.scheduleId.value
             startTimestamp = p.startInstant.toPbTimestamp()

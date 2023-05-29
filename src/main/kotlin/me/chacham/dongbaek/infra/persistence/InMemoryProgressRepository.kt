@@ -11,13 +11,13 @@ import java.time.Instant
 class InMemoryProgressRepository : ProgressRepository {
     private val progressMap = mutableMapOf<ProgressId, Progress>()
 
-    override fun save(progress: Progress): ProgressId {
+    override suspend fun save(progress: Progress): ProgressId {
         val id = progress.getId()
         progressMap[id] = progress
         return id
     }
 
-    override fun list(scheduleIds: List<ScheduleId>, instant: Instant): List<Progress> {
+    override suspend fun list(scheduleIds: List<ScheduleId>, instant: Instant): List<Progress> {
         return progressMap.values.filter {
             it.scheduleId in scheduleIds
                     && !it.startInstant.isAfter(instant)

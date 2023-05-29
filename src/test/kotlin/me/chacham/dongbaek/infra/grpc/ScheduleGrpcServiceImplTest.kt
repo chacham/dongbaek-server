@@ -1,9 +1,9 @@
 package me.chacham.dongbaek.infra.grpc
 
-import io.mockk.every
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import me.chacham.dongbaek.domain.schedule.*
 import me.chacham.dongbaek.infra.proto.PbUtils.toPbGoal
@@ -31,8 +31,8 @@ class ScheduleGrpcServiceImplTest {
             QuantityGoal(50),
             Periodic(10, 3)
         )
-        every { scheduleRepositoryMock.nextId() } returns s.id
-        every { scheduleRepositoryMock.save(s) } returns s.id
+        coEvery { scheduleRepositoryMock.nextId() } returns s.id
+        coEvery { scheduleRepositoryMock.save(s) } returns s.id
 
         val request = createScheduleRequest {
             title = s.title
@@ -43,8 +43,8 @@ class ScheduleGrpcServiceImplTest {
         }
         val response = runBlocking { impl.createSchedule(request) }
 
-        verify { scheduleRepositoryMock.nextId() }
-        verify { scheduleRepositoryMock.save(s) }
+        coVerify { scheduleRepositoryMock.nextId() }
+        coVerify { scheduleRepositoryMock.save(s) }
         assertEquals(createScheduleResponse { scheduleId = s.id.value }, response)
     }
 
@@ -62,12 +62,12 @@ class ScheduleGrpcServiceImplTest {
             QuantityGoal(50),
             Periodic(10, 3)
         )
-        every { scheduleRepositoryMock.find(id) } returns s
+        coEvery { scheduleRepositoryMock.find(id) } returns s
 
         val request = getScheduleRequest { scheduleId = id.value }
         val response = runBlocking { impl.getSchedule(request) }
 
-        verify { scheduleRepositoryMock.find(id) }
+        coVerify { scheduleRepositoryMock.find(id) }
         assertEquals(getScheduleResponse { schedule = s.toPbSchedule() }, response)
     }
 
@@ -95,12 +95,12 @@ class ScheduleGrpcServiceImplTest {
             DurationGoal(Duration.ofSeconds(3600)),
             Unrepeated
         )
-        every { scheduleRepositoryMock.list() } returns listOf(s1, s2)
+        coEvery { scheduleRepositoryMock.list() } returns listOf(s1, s2)
 
         val request = getSchedulesRequest { }
         val response = runBlocking { impl.getSchedules(request) }
 
-        verify { scheduleRepositoryMock.list() }
+        coVerify { scheduleRepositoryMock.list() }
         assertEquals(getSchedulesResponse { schedules.addAll(listOf(s1.toPbSchedule(), s2.toPbSchedule())) }, response)
     }
 
@@ -118,12 +118,12 @@ class ScheduleGrpcServiceImplTest {
             QuantityGoal(10),
             Periodic(7, 3)
         )
-        every { scheduleRepositoryMock.save(s) } returns id
+        coEvery { scheduleRepositoryMock.save(s) } returns id
 
         val request = replaceScheduleRequest { schedule = s.toPbSchedule() }
         val response = runBlocking { impl.replaceSchedule(request) }
 
-        verify { scheduleRepositoryMock.save(s) }
+        coVerify { scheduleRepositoryMock.save(s) }
         assertEquals(replaceScheduleResponse { scheduleId = id.value }, response)
     }
 
@@ -132,12 +132,12 @@ class ScheduleGrpcServiceImplTest {
         val impl = ScheduleGrpcServiceImpl(scheduleRepositoryMock)
 
         val id = ScheduleId("testScheduleId")
-        every { scheduleRepositoryMock.delete(id) } returns id
+        coEvery { scheduleRepositoryMock.delete(id) } returns id
 
         val request = deleteScheduleRequest { scheduleId = id.value }
         val response = runBlocking { impl.deleteSchedule(request) }
 
-        verify { scheduleRepositoryMock.delete(id) }
+        coVerify { scheduleRepositoryMock.delete(id) }
         assertEquals(deleteScheduleResponse { }, response)
     }
 }
