@@ -5,15 +5,16 @@ import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
-import me.chacham.dongbaek.domain.schedule.DurationProgress
-import me.chacham.dongbaek.domain.schedule.ProgressRepository
-import me.chacham.dongbaek.domain.schedule.QuantityProgress
+import me.chacham.dongbaek.domain.progress.DurationProgress
+import me.chacham.dongbaek.domain.progress.ProgressRepository
+import me.chacham.dongbaek.domain.progress.QuantityProgress
 import me.chacham.dongbaek.domain.schedule.ScheduleId
 import me.chacham.dongbaek.infra.proto.PbUtils.toPbProgress
 import me.chacham.dongbaek.infra.proto.PbUtils.toPbTimestamp
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Duration
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
@@ -24,8 +25,8 @@ class ProgressGrpcServiceImplTest {
 
         val sId1 = ScheduleId("sid1")
         val sId2 = ScheduleId("sid2")
-        val progress1 = QuantityProgress(sId1, Instant.now())
-        val progress2 = DurationProgress(sId2, Instant.now())
+        val progress1 = QuantityProgress(sId1, Instant.now(), null, 10)
+        val progress2 = DurationProgress(sId2, Instant.now(), null, Duration.ofMinutes(10), null)
         coEvery { progressRepositoryMock.list(listOf(sId1, sId2), any()) } returns listOf(progress1, progress2)
 
         val time = Instant.now()
@@ -46,7 +47,7 @@ class ProgressGrpcServiceImplTest {
         val impl = ProgressGrpcServiceImpl(progressRepositoryMock)
 
         val sId = ScheduleId("sid")
-        val p = QuantityProgress(sId, Instant.now())
+        val p = QuantityProgress(sId, Instant.now(), Instant.now().plusSeconds(3600), 10)
         coEvery { progressRepositoryMock.save(p) } returns p.getId()
 
         val request = replaceProgressRequest {

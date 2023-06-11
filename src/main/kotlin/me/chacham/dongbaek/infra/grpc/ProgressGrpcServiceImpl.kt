@@ -1,6 +1,6 @@
 package me.chacham.dongbaek.infra.grpc
 
-import me.chacham.dongbaek.domain.schedule.ProgressRepository
+import me.chacham.dongbaek.domain.progress.ProgressRepository
 import me.chacham.dongbaek.domain.schedule.ScheduleId
 import me.chacham.dongbaek.infra.proto.PbUtils.toInstant
 import me.chacham.dongbaek.infra.proto.PbUtils.toPbProgress

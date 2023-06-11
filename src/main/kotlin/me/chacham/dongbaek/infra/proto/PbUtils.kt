@@ -1,5 +1,8 @@
 package me.chacham.dongbaek.infra.proto
 
+import me.chacham.dongbaek.domain.progress.DurationProgress
+import me.chacham.dongbaek.domain.progress.Progress
+import me.chacham.dongbaek.domain.progress.QuantityProgress
 import me.chacham.dongbaek.domain.schedule.*
 import java.time.Duration
 import java.time.Instant

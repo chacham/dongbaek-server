@@ -1,9 +1,8 @@
-package me.chacham.dongbaek.domain.schedule
+package me.chacham.dongbaek.domain.progress
 
+import me.chacham.dongbaek.domain.schedule.ScheduleId
 import java.time.Duration
 import java.time.Instant
-
-data class ProgressId(val value: String)
 
 sealed class Progress(
     open val scheduleId: ScheduleId,
@@ -18,14 +17,14 @@ sealed class Progress(
 data class QuantityProgress(
     override val scheduleId: ScheduleId,
     override val startInstant: Instant,
-    override val endInstant: Instant? = null,
-    val quantity: Int = 0,
+    override val endInstant: Instant?,
+    val quantity: Int,
 ) : Progress(scheduleId, startInstant, endInstant)
 
 data class DurationProgress(
     override val scheduleId: ScheduleId,
     override val startInstant: Instant,
-    override val endInstant: Instant? = null,
-    val duration: Duration = Duration.ZERO,
-    val ongoingStartTime: Instant? = null,
+    override val endInstant: Instant?,
+    val duration: Duration,
+    val ongoingStartTime: Instant?,
 ) : Progress(scheduleId, startInstant, endInstant)

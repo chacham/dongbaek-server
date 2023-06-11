@@ -1,8 +1,8 @@
 package me.chacham.dongbaek.infra.persistence
 
-import me.chacham.dongbaek.domain.schedule.Progress
-import me.chacham.dongbaek.domain.schedule.ProgressId
-import me.chacham.dongbaek.domain.schedule.ProgressRepository
+import me.chacham.dongbaek.domain.progress.Progress
+import me.chacham.dongbaek.domain.progress.ProgressId
+import me.chacham.dongbaek.domain.progress.ProgressRepository
 import me.chacham.dongbaek.domain.schedule.ScheduleId
 import org.springframework.stereotype.Repository
 import java.time.Instant

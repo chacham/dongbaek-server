@@ -1,5 +1,6 @@
-package me.chacham.dongbaek.domain.schedule
+package me.chacham.dongbaek.domain.progress
 
+import me.chacham.dongbaek.domain.schedule.ScheduleId
 import java.time.Instant
 
 interface ProgressRepository {

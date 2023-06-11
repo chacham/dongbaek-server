@@ -1,6 +1,11 @@
 package me.chacham.dongbaek.infra.proto
 
-import me.chacham.dongbaek.domain.schedule.*
+import me.chacham.dongbaek.domain.progress.DurationProgress
+import me.chacham.dongbaek.domain.progress.QuantityProgress
+import me.chacham.dongbaek.domain.schedule.QuantityGoal
+import me.chacham.dongbaek.domain.schedule.Schedule
+import me.chacham.dongbaek.domain.schedule.ScheduleId
+import me.chacham.dongbaek.domain.schedule.Unrepeated
 import me.chacham.dongbaek.infra.proto.PbUtils.toPbProgress
 import me.chacham.dongbaek.infra.proto.PbUtils.toPbSchedule
 import me.chacham.dongbaek.infra.proto.PbUtils.toProgress
